@@ -14,4 +14,5 @@ def data_directory():
 def config_directory():
     if sys.platform == 'win32':
         return data_directory()
-    return Path(os.environ.get('XDG_CONFIG_HOME', str(Path.home() / '.config'))) / 'nawa'
+    base = os.environ.get('XDG_CONFIG_HOME')
+    return (Path(base) if base else Path.home() / '.config') / 'nawa'
