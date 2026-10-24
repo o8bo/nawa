@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+*.sqlite3*
+*.db*
+*.preferences.json
+preferences.json
+.env
+.env.*
+.venv/
+venv/
+verification/
+analysis/
+NOTION_ANALYSIS.md
+screenshot*.png
+dist/
