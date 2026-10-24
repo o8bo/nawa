@@ -293,10 +293,11 @@ class StoreTest(unittest.TestCase):
         self.assertEqual(self.store.get_task(task["id"])["title"], "keep my data")
 
     def test_default_location_is_private_and_environment_override(self):
-        with patch("nawa.paths.sys.platform", "linux"), patch.dict(os.environ, {"XDG_DATA_HOME": str(self.directory / "data"), "NAWA_DB_PATH": ""}):
+        with patch.dict(os.environ, {"XDG_DATA_HOME": str(self.directory / "data"), "LOCALAPPDATA": str(self.directory / "data"), "NAWA_DB_PATH": ""}):
             other = Store()
             try:
-                self.assertEqual(other.path, str(self.directory / "data/nawa/tasks.sqlite3"))
+                name = "Nawa" if sys.platform == "win32" else "nawa"
+                self.assertEqual(other.path, str(self.directory / "data" / name / "tasks.sqlite3"))
                 if sys.platform != 'win32':
                     self.assertEqual(os.stat(Path(other.path).parent).st_mode & 0o777, 0o700)
             finally:
