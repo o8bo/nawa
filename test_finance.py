@@ -81,7 +81,7 @@ class FinanceTests(unittest.TestCase):
 
     def test_invalid_finance_rolls_back_task_import(self):
         self.store.create_task('موجودة'); path = self.root/'bad.json'; self.store.export_json(path)
-        payload = json.loads(path.read_text()); task = copy.deepcopy(payload['tasks'][0]); task.update(id='new-task', title='يجب التراجع')
+        payload = json.loads(path.read_text(encoding='utf-8')); task = copy.deepcopy(payload['tasks'][0]); task.update(id='new-task', title='يجب التراجع')
         payload['tasks'].append(task)
         payload['finance']['expenses'] = [dict(id='bad', title='x', amount_minor=-1)]
         path.write_text(json.dumps(payload))
@@ -92,7 +92,7 @@ class FinanceTests(unittest.TestCase):
     def test_v1_database_migration_and_old_json(self):
         task = self.store.create_task('قديمة')
         path = self.root/'old.json'; self.store.export_json(path)
-        payload = json.loads(path.read_text()); payload['schema_version'] = 1; payload.pop('finance'); path.write_text(json.dumps(payload))
+        payload = json.loads(path.read_text(encoding='utf-8')); payload['schema_version'] = 1; payload.pop('finance'); path.write_text(json.dumps(payload))
         with self.store.conn:
             self.store.conn.execute('DROP TABLE expenses'); self.store.conn.execute('DROP TABLE expense_budgets')
             self.store.conn.execute('PRAGMA user_version=1')
@@ -107,7 +107,7 @@ class FinanceTests(unittest.TestCase):
         self.finance.create('أخرى', '3', 'سكن', '2026-11-02')
         self.assertEqual(len(self.finance.list('2026-10', search='فاتورة')), 1)
         path = self.root/'expenses.csv'; self.assertEqual(self.finance.export_csv(path, '2026-10'), 1)
-        with path.open() as f: rows = list(csv.reader(f))
+        with path.open(encoding='utf-8', newline='') as f: rows = list(csv.reader(f))
         self.assertEqual(rows[1][1], "'=FORMULA"); self.assertEqual(rows[1][3], '5.25')
         with self.assertRaises(ValueError): self.finance.export_csv(self.store.path, '2026-10')
         self.assertEqual(self.finance.summary('2026-10')['total'], 525)

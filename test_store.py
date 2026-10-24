@@ -185,7 +185,7 @@ class StoreTest(unittest.TestCase):
         self.store.create_task("keep")
         backup = self.directory / "bad.json"
         self.store.export_json(backup)
-        payload = json.loads(backup.read_text())
+        payload = json.loads(backup.read_text(encoding='utf-8'))
         payload["lists"].append(dict(id="newlist", name="new", color="#aabbcc"))
         payload["tasks"].append(dict(payload["tasks"][0], id="newtask", due_date="2026-02-30"))
         backup.write_text(json.dumps(payload))
@@ -199,7 +199,7 @@ class StoreTest(unittest.TestCase):
         self.store.add_subtask(task["id"], "sub")
         backup = self.directory / "collision.json"
         self.store.export_json(backup)
-        payload = json.loads(backup.read_text())
+        payload = json.loads(backup.read_text(encoding='utf-8'))
         one = dict(payload["tasks"][0], id="first", subtasks=[])
         two = dict(payload["tasks"][0], id="second")
         payload["tasks"] = [one, two]

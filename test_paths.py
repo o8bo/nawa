@@ -21,8 +21,9 @@ class PathsTests(unittest.TestCase):
                 finally: store.close()
 
     def test_windows_fallback_when_localappdata_is_absent(self):
-        with patch('nawa.paths.sys.platform', 'win32'), patch.dict(os.environ, {}, clear=True):
-            self.assertEqual(paths.data_directory(), Path.home() / 'AppData/Local/Nawa')
+        with tempfile.TemporaryDirectory() as folder:
+            with patch('nawa.paths.Path.home', return_value=Path(folder)), patch('nawa.paths.sys.platform', 'win32'), patch.dict(os.environ, {}, clear=True):
+                self.assertEqual(paths.data_directory(), Path(folder) / 'AppData/Local/Nawa')
 
     def test_linux_paths_still_respect_xdg(self):
         with tempfile.TemporaryDirectory() as folder:

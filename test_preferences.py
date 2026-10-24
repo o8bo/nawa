@@ -40,7 +40,9 @@ class PreferencesTests(unittest.TestCase):
         with patch('nawa.preferences.os.replace', side_effect=OSError('write failed')):
             with self.assertRaises(OSError): prefs.set_settings('en', 'USD', '3.75')
         self.assertEqual(prefs.settings, prefs.Preferences())
-        self.assertEqual(list(self.path.parent.iterdir()), [self.path])
+        remaining = list(self.path.parent.iterdir())
+        self.assertEqual(len(remaining), 1)
+        self.assertTrue(os.path.samefile(remaining[0], self.path))
 
     def test_invalid_rates_do_not_overwrite_saved_preferences(self):
         prefs.set_settings('en', 'USD', '٣٫٧٥')
