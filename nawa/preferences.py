@@ -5,6 +5,7 @@ import json
 import os
 from pathlib import Path
 import tempfile
+from .paths import config_directory
 
 
 @dataclass(frozen=True)
@@ -21,7 +22,7 @@ def settings_path():
     # Alternate databases get their own preferences, including test databases.
     if os.environ.get('NAWA_DB_PATH'):
         return Path(os.environ['NAWA_DB_PATH']).with_suffix('.preferences.json')
-    return Path(os.environ.get('XDG_CONFIG_HOME', str(Path.home() / '.config'))) / 'nawa' / 'preferences.json'
+    return config_directory() / 'preferences.json'
 
 
 def validated(language, currency, rate):

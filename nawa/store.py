@@ -15,6 +15,7 @@ import re
 import sqlite3
 import tempfile
 import uuid
+from .paths import data_directory
 
 
 SCHEMA_VERSION = 2
@@ -122,9 +123,7 @@ class Store:
         if path is None:
             path = os.environ.get("NAWA_DB_PATH") or None
         if path is None:
-            base = os.environ.get("XDG_DATA_HOME")
-            root = Path(base).expanduser() if base and Path(base).is_absolute() else Path.home() / ".local/share"
-            directory = root / "nawa"
+            directory = data_directory()
             directory.mkdir(parents=True, exist_ok=True, mode=0o700)
             directory.chmod(0o700)
             path = directory / "tasks.sqlite3"

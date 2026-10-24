@@ -1,6 +1,7 @@
 """Best-effort desktop reminders while Nawa is running; no background service."""
 from .i18n import tr
 from gi.repository import Gio, GLib
+import sys
 
 
 class ReminderService:
@@ -38,7 +39,10 @@ class ReminderService:
                 note.set_body(task['title'])
                 note.set_default_action('app.show')
                 note.set_priority(Gio.NotificationPriority.NORMAL)
-                self.application.send_notification('task-' + str(task['id']), note)
+                if sys.platform == 'win32' and callable(getattr(window, 'show_reminder', None)):
+                    window.show_reminder(task)
+                else:
+                    self.application.send_notification('task-' + str(task['id']), note)
                 window.store.mark_reminded(task['id'])
             self.error = None
         except Exception as error:

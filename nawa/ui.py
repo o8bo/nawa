@@ -130,7 +130,9 @@ class MainWindow(Gtk.ApplicationWindow):
         self.store = store or Store(os.environ.get("NAWA_DB_PATH"))
         self.view = 'all'; self.list_id = None; self.section = 'tasks'
         self.set_default_size(1180, 820); self.set_size_request(960, 620)
-        self.set_icon_name('org.local.Nawa')
+        icon = Path(__file__).resolve().parent.parent / 'assets' / 'nawa.png'
+        if icon.exists(): self.set_icon_from_file(str(icon))
+        else: self.set_icon_name('org.local.Nawa')
         self.connect('key-press-event', self.keypress)
         self.build_ui()
 
@@ -235,6 +237,17 @@ class MainWindow(Gtk.ApplicationWindow):
         self.expenses_page.search.set_text(expense_search); self.expenses_page.filter_category = category
         self.select_view('expenses' if section == 'expenses' else view, list_id, heading if list_id else None)
         if hasattr(self.get_application(), 'setup_tray'): self.get_application().setup_tray()
+
+    def show_reminder(self, task):
+        # Windows builds have no Gio desktop-notification backend or tray daemon.
+        # A visible GTK reminder works while the app is running.
+        dialog = Gtk.MessageDialog(transient_for=self, modal=False,
+            message_type=Gtk.MessageType.INFO, buttons=Gtk.ButtonsType.OK,
+            text=tr('موعد مهمة في نواة'))
+        dialog.format_secondary_text(task['title'])
+        dialog.connect('response', lambda widget, _: widget.destroy())
+        dialog.show_all()
+        self.present()
 
     def keypress(self, widget, event):
         if event.state & Gdk.ModifierType.CONTROL_MASK:

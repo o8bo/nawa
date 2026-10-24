@@ -39,8 +39,14 @@ def main():
     from .reminders import ReminderService
     from gi.repository import GLib, Gdk
     Gdk.set_program_class('Nawa')
+    if sys.platform == 'win32':
+        import ctypes
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('Nawa.Tasks')
     class DesktopApplication(NawaApplication):
         def setup_tray(self):
+            if sys.platform == 'win32':
+                self.window.tray = None
+                return
             try:
                 import gi
                 gi.require_version('AyatanaAppIndicator3', '0.1')
