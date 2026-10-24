@@ -5,6 +5,7 @@ import json
 import os
 from pathlib import Path
 import sqlite3
+import sys
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -32,7 +33,8 @@ class StoreTest(unittest.TestCase):
         self.assertEqual(loaded["title"], title)
         self.assertEqual(loaded["tags"], ["شخصي", "عمل"])
         self.assertEqual(len(self.store.list_tasks()), 1)
-        self.assertEqual(os.stat(self.path).st_mode & 0o777, 0o600)
+        if sys.platform != 'win32':
+            self.assertEqual(os.stat(self.path).st_mode & 0o777, 0o600)
 
     def test_date_and_field_validation_does_not_write(self):
         cases = [dict(title=" "), dict(title="a", due_date="2025-02-29"),
@@ -273,8 +275,12 @@ class StoreTest(unittest.TestCase):
         task = self.store.create_task("keep my data")
         paths = [self.path, Path(str(self.path) + "-wal"), Path(str(self.path) + "-shm"), Path(str(self.path) + "-journal")]
         link = self.directory / "db-link"
-        link.symlink_to(self.path)
-        paths.append(link)
+        try:
+            link.symlink_to(self.path)
+        except OSError:
+            if sys.platform != 'win32': raise
+        else:
+            paths.append(link)
         hardlink = self.directory / "db-hardlink"
         os.link(self.path, hardlink)
         paths.append(hardlink)
@@ -287,11 +293,12 @@ class StoreTest(unittest.TestCase):
         self.assertEqual(self.store.get_task(task["id"])["title"], "keep my data")
 
     def test_default_location_is_private_and_environment_override(self):
-        with patch.dict(os.environ, {"XDG_DATA_HOME": str(self.directory / "data"), "NAWA_DB_PATH": ""}):
+        with patch("nawa.paths.sys.platform", "linux"), patch.dict(os.environ, {"XDG_DATA_HOME": str(self.directory / "data"), "NAWA_DB_PATH": ""}):
             other = Store()
             try:
                 self.assertEqual(other.path, str(self.directory / "data/nawa/tasks.sqlite3"))
-                self.assertEqual(os.stat(Path(other.path).parent).st_mode & 0o777, 0o700)
+                if sys.platform != 'win32':
+                    self.assertEqual(os.stat(Path(other.path).parent).st_mode & 0o777, 0o700)
             finally:
                 other.close()
         with patch.dict(os.environ, {"NAWA_DB_PATH": str(self.directory / "override.db")}):

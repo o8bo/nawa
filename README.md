@@ -1,6 +1,6 @@
 # Nawa · نواة
 
-A calm workspace for your tasks and monthly expenses. Built with Python, GTK 3 and Cairo for Linux.
+A calm workspace for your tasks and monthly expenses. Built with Python, GTK 3 and Cairo for Linux and Windows.
 
 مساحة هادئة لتنظيم مهامك ومتابعة مصاريفك الشهرية، بواجهة عربية أو إنجليزية.
 
@@ -19,7 +19,24 @@ A calm workspace for your tasks and monthly expenses. Built with Python, GTK 3 a
 وفق سعر الإعدادات: **٣٫٧٥ ريال لكل دولار افتراضيًا**. يمكنك تعديل السعر؛ لا يتحدث تلقائيًا.
 تصدير JSON وSQLite يحفظ القيم الأصلية بالريال. CSV للمصاريف يستخدم عملة العرض المختارة.
 
-## التشغيل والتثبيت
+## Windows 10 / 11 · 64-bit
+
+حمّل **Setup.exe** أو **Portable.zip** من [الإصدارات](https://github.com/o8bo/nawa/releases).
+المثبّت يضيف اختصارًا لقائمة ابدأ. للنسخة المحمولة: فك الضغط بالكامل ثم افتح **Nawa.exe**.
+Python ومكتبات الواجهة مضمنة؛ لا تحتاج إلى تثبيتها.
+الملفات التنفيذية غير موقعة رقميًا.
+
+تُحفظ البيانات والإعدادات في `%LOCALAPPDATA%\Nawa`، وتبقى عند إزالة البرنامج.
+تظهر التذكيرات داخل نواة أثناء تشغيله؛ إغلاق النافذة ينهي التطبيق ويوقف التذكيرات.
+يدعم الإصدار نفس خيارات العربية والإنجليزية والريال والدولار.
+
+Download **Setup.exe** or **Portable.zip** from [Releases](https://github.com/o8bo/nawa/releases).
+Extract the entire portable ZIP before opening **Nawa.exe**. Python and GTK are bundled.
+Data and preferences live in `%LOCALAPPDATA%\Nawa` and survive uninstalling the app.
+Windows reminders appear inside the running app; closing its window exits Nawa.
+Build scripts and package notices are in [windows](windows).
+
+## التشغيل والتثبيت على Linux
 
 على Linux Mint 22 أو Ubuntu مع Python 3 وGTK 3 وPyGObject:
 

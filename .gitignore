@@ -13,3 +13,5 @@ analysis/
 NOTION_ANALYSIS.md
 screenshot*.png
 dist/
+build/
+*.spec.bak
