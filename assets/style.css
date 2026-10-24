@@ -1,0 +1,48 @@
+window, dialog { background: #faf9f5; color: #263b35; font-family: "Noto Sans Arabic", "Noto Sans", sans-serif; font-size: 14px; }
+.sidebar { background: #edf1e9; padding: 0 20px; border-left: 1px solid #e0e5dc; }
+.brand { font-size: 31px; font-weight: 800; color: #2d6150; }
+.heading { font-size: 30px; font-weight: bold; margin-top: 8px; }
+.eyebrow { color: #73827b; font-size: 12px; }
+.muted { color: #7b8981; font-size: 12px; }
+.field-label { color: #61766b; font-size: 12px; font-weight: bold; }
+button { border-radius: 9px; background: #fff; border: 1px solid #dce3da; box-shadow: none; padding: 8px 12px; color: #344b3f; }
+button:hover { background: #edf2e9; }
+button.suggested-action { background: #3b7059; color: #fff; border-color: #3b7059; font-weight: bold; }
+button.suggested-action:hover { background: #315f4b; }
+button.flat, button.nav-button { background: transparent; border-color: transparent; box-shadow: none; }
+button.nav-button { padding: 10px 12px; }
+button.nav-button:hover { background: #e0e8db; }
+button.nav-button.selected { background: #d8e5d2; color: #28573f; font-weight: bold; }
+entry { background: #fff; border: 1px solid #dce3da; border-radius: 9px; box-shadow: none; padding: 9px 12px; color: #263b35; min-height: 25px; }
+entry:focus { border-color: #76a189; }
+.task-card { background: #fff; border: 1px solid #e4e8df; border-radius: 13px; padding: 10px 12px; }
+.task-card button { background: transparent; border-color: transparent; }
+.task-card button:hover { background: #f3f6ef; }
+.task-title { font-size: 16px; font-weight: 500; }
+.task-meta { font-size: 11px; color: #7d897d; }
+.completed { color: #8a978d; text-decoration-line: line-through; }
+.overdue { color: #a16745; }
+checkbutton check { border: 1px solid #afbeac; border-radius: 5px; background: #fff; min-width: 19px; min-height: 19px; }
+checkbutton check:checked { color: #fff; background: #568367; border-color: #568367; }
+.daily-progress trough { min-height: 5px; background: #e9eee3; border: 0; border-radius: 5px; }
+.daily-progress progress { min-height: 5px; background: #8ca879; border: 0; border-radius: 5px; }
+.empty-icon { color: #8ca879; font-size: 44px; }
+.empty-title { font-size: 20px; color: #566e5c; font-weight: bold; }
+.error { color: #a74738; }
+.detail-title { font-size: 18px; font-weight: bold; }
+textview, textview text { background: white; color: #263b35; padding: 10px; }
+combobox button { background: #fff; }
+scrolledwindow viewport { background: transparent; }
+menu { background: #fff; padding: 6px; }
+menuitem { padding: 8px 12px; }
+menuitem:hover { background: #e1ebdc; }
+.finance-card { background: #fff; border: 1px solid #e0e6dc; border-radius: 14px; padding: 18px; }
+.metric-value { font-size: 23px; font-weight: bold; color: #2d6150; }
+.card-heading { font-size: 15px; font-weight: bold; color: #344b3f; }
+button.legend-row { background: transparent; border: 0; padding: 7px 1px; font-size: 12px; }
+button.legend-row:hover { background: #f3f6ef; }
+.finance-ledger-row { background: white; border: 1px solid #e4e8df; border-radius: 10px; padding: 5px 8px; }
+button.ledger-title { border: 0; background: transparent; padding: 8px; }
+.amount { color: #2d6150; font-weight: bold; font-size: 14px; }
+spinbutton, spinbutton entry { background: white; color: #263b35; border-color: #dce3da; border-radius: 9px; }
+spinbutton entry { padding: 6px; }
