@@ -1,0 +1,107 @@
+name: Windows build
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'nawa/**'
+      - 'assets/**'
+      - 'windows/**'
+      - 'test_*.py'
+      - '.github/workflows/windows.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  windows:
+    runs-on: windows-2025
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: >-
+            mingw-w64-ucrt-x86_64-python
+            mingw-w64-ucrt-x86_64-gtk3
+            mingw-w64-ucrt-x86_64-python-gobject
+            mingw-w64-ucrt-x86_64-python-cairo
+            mingw-w64-ucrt-x86_64-pyinstaller
+            mingw-w64-ucrt-x86_64-adwaita-icon-theme
+      - name: Run storage and native Windows UI tests
+        shell: msys2 {0}
+        run: python -m unittest discover -p 'test_*.py' -v
+      - name: Freeze the standalone Windows application
+        shell: msys2 {0}
+        run: python -m PyInstaller --clean --noconfirm windows/Nawa.spec
+      - name: Test executable without the development runtime on PATH
+        shell: pwsh
+        run: |
+          $originalPath = $env:PATH
+          try {
+            $env:PATH = "$env:SystemRoot\System32;$env:SystemRoot"
+            'GI_TYPELIB_PATH','GTK_PATH','GTK_DATA_PREFIX','GDK_PIXBUF_MODULE_FILE','PYTHONPATH','PYTHONHOME','GSETTINGS_SCHEMA_DIR' | ForEach-Object { Remove-Item "Env:$_" -ErrorAction SilentlyContinue }
+            $report = Join-Path $env:RUNNER_TEMP 'nawa-portable-test.json'
+            $process = Start-Process -FilePath (Resolve-Path 'dist/Nawa/Nawa.exe') -ArgumentList @('--self-test', "`"$report`"") -Wait -PassThru
+            if ($process.ExitCode -ne 0) {
+              if (Test-Path $report) { Get-Content $report }
+              throw "Packaged app failed: $($process.ExitCode)"
+            }
+            $result = Get-Content $report -Raw | ConvertFrom-Json
+            if (-not $result.success) { throw 'Packaged app smoke test did not succeed' }
+            Get-Content $report
+            Copy-Item $report 'dist/portable-test.json'
+          } finally { $env:PATH = $originalPath }
+      - name: Collect dependency notices and portable ZIP
+        shell: msys2 {0}
+        run: python windows/prepare_bundle.py
+      - name: Build installer
+        shell: pwsh
+        run: |
+          & 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe' windows/installer.iss
+          if ($LASTEXITCODE -ne 0) { throw 'Installer compilation failed' }
+      - name: Test installer, installed app and uninstaller
+        shell: pwsh
+        run: |
+          $installDir = Join-Path $env:RUNNER_TEMP 'Nawa install test'
+          $installer = (Get-ChildItem 'dist/windows/*-Setup.exe').FullName
+          $process = Start-Process -FilePath $installer -ArgumentList @('/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART','/SP-',"/DIR=`"$installDir`"") -Wait -PassThru
+          if ($process.ExitCode -ne 0) { throw "Installer failed: $($process.ExitCode)" }
+          $originalPath = $env:PATH
+          try {
+            $env:PATH = "$env:SystemRoot\System32;$env:SystemRoot"
+            $report = Join-Path $env:RUNNER_TEMP 'nawa-installed-test.json'
+            $process = Start-Process -FilePath (Join-Path $installDir 'Nawa.exe') -ArgumentList @('--self-test',"`"$report`"") -Wait -PassThru
+            if ($process.ExitCode -ne 0) {
+              if (Test-Path $report) { Get-Content $report }
+              throw "Installed app failed: $($process.ExitCode)"
+            }
+            if (-not (Get-Content $report -Raw | ConvertFrom-Json).success) { throw 'Installed app smoke test failed' }
+            Copy-Item $report 'dist/installed-test.json'
+          } finally { $env:PATH = $originalPath }
+          $process = Start-Process -FilePath (Join-Path $installDir 'unins000.exe') -ArgumentList @('/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART') -Wait -PassThru
+          if ($process.ExitCode -ne 0) { throw "Uninstaller failed: $($process.ExitCode)" }
+          if (Test-Path (Join-Path $installDir 'Nawa.exe')) { throw 'Uninstaller left the app executable behind' }
+      - name: Write checksums
+        shell: pwsh
+        run: |
+          Get-ChildItem 'dist/windows/*' -File | ForEach-Object {
+            $hash = (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower()
+            "$hash  $($_.Name)"
+          } | Set-Content -Encoding ascii 'dist/windows/SHA256SUMS.txt'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Nawa-0.3.1-Windows-x64
+          path: |
+            dist/windows/*
+            dist/*-test.json
+          if-no-files-found: error
+      - name: Publish Windows download
+        if: github.ref == 'refs/heads/main'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = "windows-0.3.1-build-${{ github.run_number }}"
+          gh release create $tag --target '${{ github.sha }}' --title 'Nawa 0.3.1 for Windows' --notes-file windows/release-notes.md dist/windows/*
+          if ($LASTEXITCODE -ne 0) { throw 'Release upload failed' }
